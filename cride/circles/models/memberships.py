@@ -25,7 +25,7 @@ class Membership(models.Model):
     )
 
     # Invitations
-    userd_invitation = models.PositiveSmallIntegerField(default=0)
+    used_invitations = models.PositiveSmallIntegerField(default=0)
     remaining_invitations = models.PositiveSmallIntegerField(default=0)
     invited_by = models.ForeignKey(
         'users.User',
