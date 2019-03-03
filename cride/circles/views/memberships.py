@@ -7,7 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 # Models
-from cride.circles.models import Circle, Membership
+from cride.circles.models import Circle, Membership, Invitation
 
 # Permission
 from rest_framework.permissions import IsAuthenticated
@@ -65,14 +65,29 @@ class MembershipViewSet(mixins.ListModelMixin,
         used its invitation and another list containining the
         invitations that haven't being used yet.
         """
-
+        member = self.get_object()
         invited_members = Membership.objects.filter(
             circle=self.circle,
             invited_by=request.user,
             is_active=True
         )
 
+        unused_invitations = Invitation.objects.filter(
+            circle=self.circle,
+            issued_by=request.user,
+            used=False
+        ).values_list('code')
+        diff = member.remaining_invitations - len(unused_invitations)
+
+        invitations = [x[0] for x in unused_invitations]
+        for i in range(0, diff):
+            Invitation.objects.create(
+                issued_by=request.user,
+                circle=self.circle
+            ).code
+
         data = {
-            'used_invitations': MembershipModelSerializer(invited_members, many=True).data
+            'used_invitations': MembershipModelSerializer(invited_members, many=True).data,
+            'invitations': invitations
         }
         return Response(data)
