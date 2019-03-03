@@ -2,7 +2,9 @@
 
 # Django REST Framework
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 # Models
 from cride.circles.models import Circle, Membership
@@ -54,3 +56,23 @@ class MembershipViewSet(mixins.ListModelMixin,
         """Disable membership"""
         instance.is_active = False
         instance.save()
+
+    @action(detail=True, methods=['GET'])
+    def invitations(self, request, *args, **kwargs):
+        """Rectrieve a member's invitations breakdown.
+
+        will return a list containining all the members that have
+        used its invitation and another list containining the
+        invitations that haven't being used yet.
+        """
+
+        invited_members = Membership.objects.filter(
+            circle=self.circle,
+            invited_by=request.user,
+            is_active=True
+        )
+
+        data = {
+            'used_invitations': MembershipModelSerializer(invited_members, many=True).data
+        }
+        return Response(data)
