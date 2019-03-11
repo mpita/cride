@@ -4,7 +4,7 @@
 from django.contrib import admin
 
 # Model
-from cride.circles.models import Circle
+from cride.circles.models import Circle, Membership
 
 
 @admin.register(Circle)
@@ -24,4 +24,22 @@ class CircleAdmin(admin.ModelAdmin):
         'is_public',
         'verified',
         'is_limited'
+    )
+
+
+@admin.register(Membership)
+class MembershipAdmin(admin.ModelAdmin):
+    """Membership admin."""
+
+    list_display = (
+        'user',
+        'profile',
+        'circle',
+        'is_admin',
+        'is_active'
+    )
+    search_fields = ('circle',)
+    list_filter = (
+        'is_admin',
+        'is_active'
     )
